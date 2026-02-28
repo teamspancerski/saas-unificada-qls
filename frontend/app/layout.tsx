@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import AppContainer from '../components/AppContainer'
 
 export const metadata: Metadata = {
   title: 'QLS Robô Premium',
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="bg-[#020617] text-slate-200 selection:bg-[#00ff88]/30 font-sans overflow-x-hidden">
+        <AppContainer>
+          {children}
+        </AppContainer>
+      </body>
     </html>
   )
 }
