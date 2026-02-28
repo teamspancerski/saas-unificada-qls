@@ -1,0 +1,9 @@
+node_modules
+dist
+.next
+.env
+*.log
+backend/src/generated
+backend/.env
+frontend/.env
+verification/

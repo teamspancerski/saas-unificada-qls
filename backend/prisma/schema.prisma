@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String        @id @default(cuid())
+  uuid            String        @unique @default(uuid())
+  email           String        @unique
+  name            String?
+  hashedPassword  String
+  stripeCustomerId String?      @unique
+  subscription    Subscription?
+  apiKeys         ApiKey[]
+
+  // Bot Strategy Configuration
+  botStatus       Boolean       @default(false)
+  strategyMode    String        @default("off") // auto, monitor, off
+  capitalTotal    Float         @default(1000)
+  riskPerTrade    Float         @default(1.0)
+  maxHoldTime     String        @default("1h") // 15m, 1h, 4h, 24h
+  pingPongEnabled Boolean       @default(false)
+
+  // Risk Metrics
+  dailyPnL        Float         @default(0)
+  lastEquityReset DateTime      @default(now())
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  orders          Order[]
+
+  @@map("users")
+}
+
+model ApiKey {
+  id         String @id @default(cuid())
+  userId     String
+  exchange   String
+  apiKey     String
+  secret     String
+  viewOnly   Boolean @default(true)
+  user       User   @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id            String @id @default(cuid())
+  userId        String @unique
+  user          User   @relation(fields: [userId], references: [id])
+  stripeSubId   String @unique
+  stripePriceId String
+  status        String
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  userId          String
+  symbol          String
+  side            String   // buy, sell
+  type            String   // long, short
+  entryPrice      Float
+  exitPrice       Float?
+  amount          Float
+  size            Float    // Position size in USD
+  score           Float
+  status          String   @default("open") // open, closed, forced_closed
+  pingPongState   String?  // none, first_stop, short_2x
+  openedAt        DateTime @default(now())
+  closedAt        DateTime?
+  forceCloseAt    DateTime?
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@map("orders")
+}
