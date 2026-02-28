@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String        @id @default(cuid())
+  email           String        @unique
+  name            String?
+  hashedPassword  String
+  stripeCustomerId String?      @unique
+  subscription    Subscription?
+  apiKeys         ApiKey[]
+  botStatus       Boolean       @default(false)
+  capitalTotal    Float         @default(10000)
+  riskPerTrade    Float         @default(1.0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  signals         Signal[]
+
+  @@map("users")
+}
+
+model ApiKey {
+  id         String @id @default(cuid())
+  userId     String
+  exchange   String
+  apiKey     String
+  secret     String
+  viewOnly   Boolean @default(true)
+  user       User   @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id            String @id @default(cuid())
+  userId        String @unique
+  user          User   @relation(fields: [userId], references: [id])
+  stripeSubId   String @unique
+  stripePriceId String
+  status        String
+}
+
+model Signal {
+  id        String   @id @default(cuid())
+  userId    String
+  symbol    String
+  action    String
+  score     Float
+  price     Float
+  size      Float
+  status    String   @default("open")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
