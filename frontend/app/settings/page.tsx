@@ -63,7 +63,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between p-4 bg-black/40 rounded-2xl border border-white/5">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-200">Execução Automática</p>
-                      <p className="text-[9px] text-slate-500 mt-1">O bot abrirá ordens assim que o score > 75%</p>
+                      <p className="text-[9px] text-slate-500 mt-1">O bot abrirá ordens assim que o score {'>'} 75%</p>
                     </div>
                     <div className="w-12 h-6 bg-[#00ff88]/20 rounded-full relative cursor-pointer border border-[#00ff88]/30">
                       <div className="absolute right-1 top-1 w-4 h-4 bg-[#00ff88] rounded-full shadow-[0_0_10px_#00ff88]"></div>
