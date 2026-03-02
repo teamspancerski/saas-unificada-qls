@@ -2,10 +2,17 @@ import ccxt from 'ccxt';
 import * as ta from 'technicalindicators';
 import { prisma } from './prisma';
 
+type ScoredPair = {
+  symbol: string
+  score: number
+  data: unknown
+}
+
+
 export class QLCEngine {
   private static instance: QLCEngine;
   private binance: ccxt.binance;
-  public topPairs: any[] = [];
+  public topPairs: ScoredPair[] = [];
 
   private constructor() {
     this.binance = new ccxt.binance();
@@ -33,7 +40,7 @@ export class QLCEngine {
       // Top pairs selection logic (simplified for demo)
       const pairs = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'ARB/USDT'];
 
-      const scoredPairs = [];
+      const scoredPairs: ScoredPair[] = [];
       for (const symbol of pairs) {
         const data = await this.fetchMarketData(symbol);
         if (!data) continue;
