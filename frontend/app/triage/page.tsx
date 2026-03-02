@@ -3,17 +3,18 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, FileText, CheckCircle2, Gavel, User, Mail, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 export default function TriagePage() {
   const [step, setStep] = useState(0);
-  const [sessionId, setSessionId] = useState(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     description: '',
   });
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<any>(null);
 
   const steps = [
     {
@@ -40,8 +41,7 @@ export default function TriagePage() {
   ];
 
   useEffect(() => {
-    fetch('http://localhost:3000/triage/start', { method: 'POST' })
-      .then(res => res.json())
+    api.post('/triage/start', {})
       .then(data => setSessionId(data.sessionId));
   }, []);
 
@@ -50,12 +50,8 @@ export default function TriagePage() {
       setStep(step + 1);
     } else {
       setLoading(true);
-      const res = await fetch(`http://localhost:3000/triage/process/${sessionId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      const data = await res.json();
+      if (!sessionId) return;
+      const data = await api.post(`/triage/process/${sessionId}`, formData);
       setResult(data);
       setLoading(false);
     }
