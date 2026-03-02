@@ -8,71 +8,104 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id              String        @id @default(cuid())
-  uuid            String        @unique @default(uuid())
-  email           String        @unique
-  name            String?
-  hashedPassword  String
-  stripeCustomerId String?      @unique
-  subscription    Subscription?
-  apiKeys         ApiKey[]
+model LawyerProfile {
+  id                String         @id @default(cuid())
+  name              String
+  email             String         @unique
+  password          String
+  OAB_UF            String
+  OAB_Number        String
+  Specialties       String[]
+  Bio               String?
+  Lat               Float?
+  Long              Float?
+  Rating            Float          @default(5.0)
+  Stripe_Customer_ID String?       @unique
+  Plan_Level        String         @default("Essential") // Essential | Professional | Elite
+  WhiteLabel_Logo   String?
+  Subscription_Status String       @default("inactive")
+  cases             Case[]
+  auditLogs         AuditLog[]
+  subscriptions     Subscription[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
-  // Bot Strategy Configuration
-  botStatus       Boolean       @default(false)
-  strategyMode    String        @default("off") // auto, monitor, off
-  capitalTotal    Float         @default(1000)
-  riskPerTrade    Float         @default(1.0)
-  maxHoldTime     String        @default("1h") // 15m, 1h, 4h, 24h
-  pingPongEnabled Boolean       @default(false)
-
-  // Risk Metrics
-  dailyPnL        Float         @default(0)
-  lastEquityReset DateTime      @default(now())
-
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  orders          Order[]
-
-  @@map("users")
+  @@map("lawyer_profiles")
 }
 
-model ApiKey {
-  id         String @id @default(cuid())
-  userId     String
-  exchange   String
-  apiKey     String
-  secret     String
-  viewOnly   Boolean @default(true)
-  user       User   @relation(fields: [userId], references: [id])
+model Client {
+  id             String   @id @default(cuid())
+  name           String?
+  email          String?  @unique
+  last_triage_id String?
+  cases          Case[]
+  triages        Triage[]
+  createdAt      DateTime @default(now())
+
+  @@map("clients")
+}
+
+model Case {
+  id            String   @id @default(cuid())
+  lawyer_id     String
+  client_id     String
+  status        String   @default("Active") // Active | Archived | Priority
+  timeline_json Json
+  lawyer        LawyerProfile @relation(fields: [lawyer_id], references: [id])
+  client        Client        @relation(fields: [client_id], references: [id])
+  vaults        Vault[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("cases")
+}
+
+model Triage {
+  id                  String   @id @default(cuid())
+  session_id          String   @unique
+  client_id           String?
+  intake_data         Json
+  document_links      String[]
+  ai_summary          String?
+  auto_classification String?
+  client              Client?  @relation(fields: [client_id], references: [id])
+  createdAt           DateTime @default(now())
+
+  @@map("triages")
+}
+
+model Vault {
+  id                 String   @id @default(cuid())
+  document_id        String   @unique
+  case_id            String
+  encryption_key_ref String
+  audit_log_id       String?
+  case               Case     @relation(fields: [case_id], references: [id])
+  createdAt          DateTime @default(now())
+
+  @@map("vaults")
 }
 
 model Subscription {
-  id            String @id @default(cuid())
-  userId        String @unique
-  user          User   @relation(fields: [userId], references: [id])
-  stripeSubId   String @unique
-  stripePriceId String
-  status        String
+  id                    String        @id @default(cuid())
+  lawyer_id             String
+  Plan_ID               String
+  Stripe_Subscription_ID String       @unique
+  Trial_Ends            DateTime?
+  status                String
+  lawyer                LawyerProfile @relation(fields: [lawyer_id], references: [id])
+  createdAt             DateTime      @default(now())
+
+  @@map("subscriptions")
 }
 
-model Order {
-  id              String   @id @default(cuid())
-  userId          String
-  symbol          String
-  side            String   // buy, sell
-  type            String   // long, short
-  entryPrice      Float
-  exitPrice       Float?
-  amount          Float
-  size            Float    // Position size in USD
-  score           Float
-  status          String   @default("open") // open, closed, forced_closed
-  pingPongState   String?  // none, first_stop, short_2x
-  openedAt        DateTime @default(now())
-  closedAt        DateTime?
-  forceCloseAt    DateTime?
-  user            User     @relation(fields: [userId], references: [id])
+model AuditLog {
+  id         String        @id @default(cuid())
+  user_id    String?
+  action     String
+  ip_address String?
+  timestamp  DateTime      @default(now())
+  lawyer     LawyerProfile? @relation(fields: [user_id], references: [id])
 
-  @@map("orders")
+  @@map("audit_logs")
 }
