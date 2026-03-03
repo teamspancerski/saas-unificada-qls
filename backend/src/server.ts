@@ -28,6 +28,10 @@ const startServer = async () => {
   fastify.register(stripeRoutes);
   fastify.register(strategyRoutes);
 
+  fastify.get('/health', async () => {
+    return { status: 'OK', timestamp: new Date().toISOString() };
+  });
+
   // 🧠 MOTOR QLC - Enhanced Demo Isolated Engine
   const engine = QLCEngine.getInstance();
   engine.start();

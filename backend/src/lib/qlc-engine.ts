@@ -25,15 +25,21 @@ export class QLCEngine {
 
   private async scan() {
     try {
-      const activeUsers = await prisma.user.findMany({
-        where: { strategyMode: { in: ['auto', 'monitor'] } },
-        include: { orders: { where: { status: 'open' } } }
-      });
+      let activeUsers: any[] = [];
+      try {
+        activeUsers = await prisma.user.findMany({
+          where: { strategyMode: { in: ['auto', 'monitor'] } },
+          include: { orders: { where: { status: 'open' } } }
+        });
+      } catch (e) {
+        console.error('Prisma Scan Error (Users Table might be missing):', e);
+        activeUsers = [];
+      }
 
       // Top pairs selection logic (simplified for demo)
       const pairs = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'ARB/USDT'];
 
-      const scoredPairs = [];
+      const scoredPairs: any[] = [];
       for (const symbol of pairs) {
         const data = await this.fetchMarketData(symbol);
         if (!data) continue;
@@ -45,7 +51,7 @@ export class QLCEngine {
           await this.processUserStrategy(user, symbol, data, score);
         }
       }
-      this.topPairs = scoredPairs.sort((a, b) => b.score - a.score).slice(0, 5);
+      this.topPairs = scoredPairs.sort((a: any, b: any) => b.score - a.score).slice(0, 5);
 
       await this.checkForceCloses();
     } catch (error) {
@@ -172,17 +178,21 @@ export class QLCEngine {
   }
 
   private async checkForceCloses() {
-    const now = new Date();
-    const expiredOrders = await prisma.order.findMany({
-      where: { status: 'open', forceCloseAt: { lte: now } }
-    });
-
-    for (const order of expiredOrders) {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { status: 'forced_closed', closedAt: now }
+    try {
+      const now = new Date();
+      const expiredOrders = await prisma.order.findMany({
+        where: { status: 'open', forceCloseAt: { lte: now } }
       });
-      console.log(`[FORCE CLOSE] Order ${order.id} closed due to time limit`);
+
+      for (const order of expiredOrders) {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { status: 'forced_closed', closedAt: now }
+        });
+        console.log(`[FORCE CLOSE] Order ${order.id} closed due to time limit`);
+      }
+    } catch (e) {
+      console.error('Check Force Closes Error:', e);
     }
   }
 }

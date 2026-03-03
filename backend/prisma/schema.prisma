@@ -17,6 +17,7 @@ model User {
   stripeCustomerId String?      @unique
   subscription    Subscription?
   apiKeys         ApiKey[]
+  plan            String        @default("FREE") // FREE, PRO, ELITE
 
   // Bot Strategy Configuration
   botStatus       Boolean       @default(false)

@@ -1171,6 +1171,7 @@ export namespace Prisma {
     name: string | null
     hashedPassword: string | null
     stripeCustomerId: string | null
+    plan: string | null
     botStatus: boolean | null
     strategyMode: string | null
     capitalTotal: number | null
@@ -1190,6 +1191,7 @@ export namespace Prisma {
     name: string | null
     hashedPassword: string | null
     stripeCustomerId: string | null
+    plan: string | null
     botStatus: boolean | null
     strategyMode: string | null
     capitalTotal: number | null
@@ -1209,6 +1211,7 @@ export namespace Prisma {
     name: number
     hashedPassword: number
     stripeCustomerId: number
+    plan: number
     botStatus: number
     strategyMode: number
     capitalTotal: number
@@ -1242,6 +1245,7 @@ export namespace Prisma {
     name?: true
     hashedPassword?: true
     stripeCustomerId?: true
+    plan?: true
     botStatus?: true
     strategyMode?: true
     capitalTotal?: true
@@ -1261,6 +1265,7 @@ export namespace Prisma {
     name?: true
     hashedPassword?: true
     stripeCustomerId?: true
+    plan?: true
     botStatus?: true
     strategyMode?: true
     capitalTotal?: true
@@ -1280,6 +1285,7 @@ export namespace Prisma {
     name?: true
     hashedPassword?: true
     stripeCustomerId?: true
+    plan?: true
     botStatus?: true
     strategyMode?: true
     capitalTotal?: true
@@ -1386,6 +1392,7 @@ export namespace Prisma {
     name: string | null
     hashedPassword: string
     stripeCustomerId: string | null
+    plan: string
     botStatus: boolean
     strategyMode: string
     capitalTotal: number
@@ -1424,6 +1431,7 @@ export namespace Prisma {
     name?: boolean
     hashedPassword?: boolean
     stripeCustomerId?: boolean
+    plan?: boolean
     botStatus?: boolean
     strategyMode?: boolean
     capitalTotal?: boolean
@@ -1447,6 +1455,7 @@ export namespace Prisma {
     name?: boolean
     hashedPassword?: boolean
     stripeCustomerId?: boolean
+    plan?: boolean
     botStatus?: boolean
     strategyMode?: boolean
     capitalTotal?: boolean
@@ -1466,6 +1475,7 @@ export namespace Prisma {
     name?: boolean
     hashedPassword?: boolean
     stripeCustomerId?: boolean
+    plan?: boolean
     botStatus?: boolean
     strategyMode?: boolean
     capitalTotal?: boolean
@@ -1500,6 +1510,7 @@ export namespace Prisma {
       name: string | null
       hashedPassword: string
       stripeCustomerId: string | null
+      plan: string
       botStatus: boolean
       strategyMode: string
       capitalTotal: number
@@ -1912,6 +1923,7 @@ export namespace Prisma {
     readonly name: FieldRef<"User", 'String'>
     readonly hashedPassword: FieldRef<"User", 'String'>
     readonly stripeCustomerId: FieldRef<"User", 'String'>
+    readonly plan: FieldRef<"User", 'String'>
     readonly botStatus: FieldRef<"User", 'Boolean'>
     readonly strategyMode: FieldRef<"User", 'String'>
     readonly capitalTotal: FieldRef<"User", 'Float'>
@@ -5307,6 +5319,7 @@ export namespace Prisma {
     name: 'name',
     hashedPassword: 'hashedPassword',
     stripeCustomerId: 'stripeCustomerId',
+    plan: 'plan',
     botStatus: 'botStatus',
     strategyMode: 'strategyMode',
     capitalTotal: 'capitalTotal',
@@ -5471,6 +5484,7 @@ export namespace Prisma {
     name?: StringNullableFilter<"User"> | string | null
     hashedPassword?: StringFilter<"User"> | string
     stripeCustomerId?: StringNullableFilter<"User"> | string | null
+    plan?: StringFilter<"User"> | string
     botStatus?: BoolFilter<"User"> | boolean
     strategyMode?: StringFilter<"User"> | string
     capitalTotal?: FloatFilter<"User"> | number
@@ -5493,6 +5507,7 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     hashedPassword?: SortOrder
     stripeCustomerId?: SortOrderInput | SortOrder
+    plan?: SortOrder
     botStatus?: SortOrder
     strategyMode?: SortOrder
     capitalTotal?: SortOrder
@@ -5518,6 +5533,7 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     name?: StringNullableFilter<"User"> | string | null
     hashedPassword?: StringFilter<"User"> | string
+    plan?: StringFilter<"User"> | string
     botStatus?: BoolFilter<"User"> | boolean
     strategyMode?: StringFilter<"User"> | string
     capitalTotal?: FloatFilter<"User"> | number
@@ -5540,6 +5556,7 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     hashedPassword?: SortOrder
     stripeCustomerId?: SortOrderInput | SortOrder
+    plan?: SortOrder
     botStatus?: SortOrder
     strategyMode?: SortOrder
     capitalTotal?: SortOrder
@@ -5567,6 +5584,7 @@ export namespace Prisma {
     name?: StringNullableWithAggregatesFilter<"User"> | string | null
     hashedPassword?: StringWithAggregatesFilter<"User"> | string
     stripeCustomerId?: StringNullableWithAggregatesFilter<"User"> | string | null
+    plan?: StringWithAggregatesFilter<"User"> | string
     botStatus?: BoolWithAggregatesFilter<"User"> | boolean
     strategyMode?: StringWithAggregatesFilter<"User"> | string
     capitalTotal?: FloatWithAggregatesFilter<"User"> | number
@@ -5808,6 +5826,7 @@ export namespace Prisma {
     name?: string | null
     hashedPassword: string
     stripeCustomerId?: string | null
+    plan?: string
     botStatus?: boolean
     strategyMode?: string
     capitalTotal?: number
@@ -5830,6 +5849,7 @@ export namespace Prisma {
     name?: string | null
     hashedPassword: string
     stripeCustomerId?: string | null
+    plan?: string
     botStatus?: boolean
     strategyMode?: string
     capitalTotal?: number
@@ -5852,6 +5872,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     hashedPassword?: StringFieldUpdateOperationsInput | string
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    plan?: StringFieldUpdateOperationsInput | string
     botStatus?: BoolFieldUpdateOperationsInput | boolean
     strategyMode?: StringFieldUpdateOperationsInput | string
     capitalTotal?: FloatFieldUpdateOperationsInput | number
@@ -5874,6 +5895,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     hashedPassword?: StringFieldUpdateOperationsInput | string
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    plan?: StringFieldUpdateOperationsInput | string
     botStatus?: BoolFieldUpdateOperationsInput | boolean
     strategyMode?: StringFieldUpdateOperationsInput | string
     capitalTotal?: FloatFieldUpdateOperationsInput | number
@@ -5896,6 +5918,7 @@ export namespace Prisma {
     name?: string | null
     hashedPassword: string
     stripeCustomerId?: string | null
+    plan?: string
     botStatus?: boolean
     strategyMode?: string
     capitalTotal?: number
@@ -5915,6 +5938,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     hashedPassword?: StringFieldUpdateOperationsInput | string
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    plan?: StringFieldUpdateOperationsInput | string
     botStatus?: BoolFieldUpdateOperationsInput | boolean
     strategyMode?: StringFieldUpdateOperationsInput | string
     capitalTotal?: FloatFieldUpdateOperationsInput | number
@@ -5934,6 +5958,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     hashedPassword?: StringFieldUpdateOperationsInput | string
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    plan?: StringFieldUpdateOperationsInput | string
     botStatus?: BoolFieldUpdateOperationsInput | boolean
     strategyMode?: StringFieldUpdateOperationsInput | string
     capitalTotal?: FloatFieldUpdateOperationsInput | number
@@ -6282,6 +6307,7 @@ export namespace Prisma {
     name?: SortOrder
     hashedPassword?: SortOrder
     stripeCustomerId?: SortOrder
+    plan?: SortOrder
     botStatus?: SortOrder
     strategyMode?: SortOrder
     capitalTotal?: SortOrder
@@ -6307,6 +6333,7 @@ export namespace Prisma {
     name?: SortOrder
     hashedPassword?: SortOrder
     stripeCustomerId?: SortOrder
+    plan?: SortOrder
     botStatus?: SortOrder
     strategyMode?: SortOrder
     capitalTotal?: SortOrder
@@ -6326,6 +6353,7 @@ export namespace Prisma {
     name?: SortOrder
     hashedPassword?: SortOrder
     stripeCustomerId?: SortOrder
+    plan?: SortOrder
     botStatus?: SortOrder
     strategyMode?: SortOrder
     capitalTotal?: SortOrder
@@ -7177,6 +7205,7 @@ export namespace Prisma {
     name?: string | null
     hashedPassword: string
     stripeCustomerId?: string | null
+    plan?: string
     botStatus?: boolean
     strategyMode?: string
     capitalTotal?: number
@@ -7198,6 +7227,7 @@ export namespace Prisma {
     name?: string | null
     hashedPassword: string
     stripeCustomerId?: string | null
+    plan?: string
     botStatus?: boolean
     strategyMode?: string
     capitalTotal?: number
@@ -7235,6 +7265,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     hashedPassword?: StringFieldUpdateOperationsInput | string
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    plan?: StringFieldUpdateOperationsInput | string
     botStatus?: BoolFieldUpdateOperationsInput | boolean
     strategyMode?: StringFieldUpdateOperationsInput | string
     capitalTotal?: FloatFieldUpdateOperationsInput | number
@@ -7256,6 +7287,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     hashedPassword?: StringFieldUpdateOperationsInput | string
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    plan?: StringFieldUpdateOperationsInput | string
     botStatus?: BoolFieldUpdateOperationsInput | boolean
     strategyMode?: StringFieldUpdateOperationsInput | string
     capitalTotal?: FloatFieldUpdateOperationsInput | number
@@ -7277,6 +7309,7 @@ export namespace Prisma {
     name?: string | null
     hashedPassword: string
     stripeCustomerId?: string | null
+    plan?: string
     botStatus?: boolean
     strategyMode?: string
     capitalTotal?: number
@@ -7298,6 +7331,7 @@ export namespace Prisma {
     name?: string | null
     hashedPassword: string
     stripeCustomerId?: string | null
+    plan?: string
     botStatus?: boolean
     strategyMode?: string
     capitalTotal?: number
@@ -7335,6 +7369,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     hashedPassword?: StringFieldUpdateOperationsInput | string
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    plan?: StringFieldUpdateOperationsInput | string
     botStatus?: BoolFieldUpdateOperationsInput | boolean
     strategyMode?: StringFieldUpdateOperationsInput | string
     capitalTotal?: FloatFieldUpdateOperationsInput | number
@@ -7356,6 +7391,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     hashedPassword?: StringFieldUpdateOperationsInput | string
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    plan?: StringFieldUpdateOperationsInput | string
     botStatus?: BoolFieldUpdateOperationsInput | boolean
     strategyMode?: StringFieldUpdateOperationsInput | string
     capitalTotal?: FloatFieldUpdateOperationsInput | number
@@ -7377,6 +7413,7 @@ export namespace Prisma {
     name?: string | null
     hashedPassword: string
     stripeCustomerId?: string | null
+    plan?: string
     botStatus?: boolean
     strategyMode?: string
     capitalTotal?: number
@@ -7398,6 +7435,7 @@ export namespace Prisma {
     name?: string | null
     hashedPassword: string
     stripeCustomerId?: string | null
+    plan?: string
     botStatus?: boolean
     strategyMode?: string
     capitalTotal?: number
@@ -7435,6 +7473,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     hashedPassword?: StringFieldUpdateOperationsInput | string
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    plan?: StringFieldUpdateOperationsInput | string
     botStatus?: BoolFieldUpdateOperationsInput | boolean
     strategyMode?: StringFieldUpdateOperationsInput | string
     capitalTotal?: FloatFieldUpdateOperationsInput | number
@@ -7456,6 +7495,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     hashedPassword?: StringFieldUpdateOperationsInput | string
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    plan?: StringFieldUpdateOperationsInput | string
     botStatus?: BoolFieldUpdateOperationsInput | boolean
     strategyMode?: StringFieldUpdateOperationsInput | string
     capitalTotal?: FloatFieldUpdateOperationsInput | number

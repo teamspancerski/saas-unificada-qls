@@ -129,6 +129,7 @@ exports.Prisma.UserScalarFieldEnum = {
   name: 'name',
   hashedPassword: 'hashedPassword',
   stripeCustomerId: 'stripeCustomerId',
+  plan: 'plan',
   botStatus: 'botStatus',
   strategyMode: 'strategyMode',
   capitalTotal: 'capitalTotal',
