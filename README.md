@@ -1,2 +1,144 @@
-Cole: # QLS SaaS Unificada v4
-Commit new file > "Commit directly to main"
+# QLS SaaS Unificada v4
+
+## ✅ Prisma concluiu. O que fazer agora?
+
+Se estes comandos já rodaram sem erro:
+
+- `npx prisma migrate dev --name init_v4`
+- `npx prisma generate`
+
+então o banco está sincronizado e o próximo passo é iniciar backend + frontend.
+
+---
+
+## Comandos **sem falha** (de qualquer pasta)
+
+Use caminhos absolutos para evitar erro de `README.md: No such file or directory`:
+
+```bash
+cd /workspaces/saas-unificada-qls
+nl -ba README.md | sed -n '1,220p'
+git status --short && git log -1 --oneline
+```
+
+Se estiver dentro de `backend` ou `frontend`, o README da raiz é:
+
+```bash
+nl -ba ../README.md | sed -n '1,220p'
+```
+
+---
+
+## Subir localmente
+
+### 1) Backend
+
+```bash
+cd /workspaces/saas-unificada-qls/backend
+npm install
+npm run dev
+```
+
+Backend esperado em: `http://localhost:4000`
+
+### 2) Frontend
+
+```bash
+cd /workspaces/saas-unificada-qls/frontend
+npm install
+npm run dev
+```
+
+Frontend esperado em: `http://localhost:3000`
+
+---
+
+## Porta “desativada” no Codespaces/Jules
+
+1. Abra a aba **Ports**.
+2. Adicione as portas `3000` e `4000`.
+3. Defina visibilidade (Public/Org, conforme necessário).
+4. Atualize o preview.
+
+Teste rápido backend:
+
+```bash
+curl http://localhost:4000/health
+```
+
+---
+
+## Render: checklist para erro de deploy
+
+Quando o deploy falha no Render, valide estes pontos:
+
+1. **Serviço backend**
+   - Build Command: `cd backend && npm install && npx prisma generate && npx prisma migrate deploy && npm run build`
+   - Start Command: `cd backend && npm run start`
+
+2. **Variáveis obrigatórias (backend)**
+   - `DATABASE_URL`
+   - `JWT_SECRET`
+
+3. **Serviço frontend**
+   - Build Command: `cd frontend && npm install && npm run build`
+   - Start Command: `cd frontend && npm run start`
+   - `NEXT_PUBLIC_API_URL` deve apontar para a URL pública do backend no Render.
+
+4. **Node version**
+   - Use Node 18+ (ideal Node 20).
+
+5. **Se aparecer só texto de commits (como `f470288 Migration & Frontend MVP`)**
+   - Isso **não é o erro técnico**: é apenas descrição/changelog de commit.
+   - No Render, abra o serviço > **Events** > clique no deploy com falha > **View Logs**.
+   - Copie as primeiras linhas que contenham `Error`, `Failed`, `Cannot find module`, `Prisma`, `TypeScript`, `npm ERR!` ou `Exit status`.
+
+6. **Prisma em produção**
+   - Em produção, use `prisma migrate deploy` (não `migrate dev`).
+   - Se o banco estiver vazio, rode primeiro as migrations localmente e suba a pasta `backend/prisma/migrations` para o repositório.
+
+---
+
+## Se o README aparecer diferente (ex.: "Cole: ...")
+
+Você provavelmente está em branch/estado antigo. Rode:
+
+```bash
+cd /workspaces/saas-unificada-qls
+git fetch --all
+git status
+```
+
+Depois confirme o conteúdo do README novamente com:
+
+```bash
+nl -ba README.md | sed -n '1,220p'
+```
+
+Se ainda aparecer:
+
+```
+1  Cole: # QLS SaaS Unificada v4
+2  Commit new file > "Commit directly to main"
+```
+
+faça este reparo **sem perder suas alterações do backend/frontend**:
+
+```bash
+cd /workspaces/saas-unificada-qls
+# restaura só o README da branch remota
+git fetch origin
+git checkout origin/$(git rev-parse --abbrev-ref HEAD) -- README.md
+
+# confirme
+nl -ba README.md | sed -n '1,40p'
+```
+
+Se o comando acima falhar por nome de branch incomum, use:
+
+```bash
+cd /workspaces/saas-unificada-qls
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+git fetch origin
+git checkout origin/$CURRENT_BRANCH -- README.md
+```
