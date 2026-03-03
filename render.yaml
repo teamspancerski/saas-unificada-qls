@@ -11,6 +11,16 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: FRONTEND_URL
+        value: https://qls-frontend.onrender.com
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: BINANCE_API_KEY
+        sync: false
+      - key: BINANCE_SECRET
+        sync: false
+      - key: ENCRYPTION_KEY
+        generateValue: true
 
   - type: web
     name: qls-frontend
