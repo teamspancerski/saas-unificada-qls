@@ -73,7 +73,7 @@ curl http://localhost:4000/health
 Quando o deploy falha no Render, valide estes pontos:
 
 1. **Serviço backend**
-   - Build Command: `cd backend && npm install && npx prisma generate && npm run build`
+   - Build Command: `cd backend && npm install && npx prisma generate && npx prisma migrate deploy && npm run build`
    - Start Command: `cd backend && npm run start`
 
 2. **Variáveis obrigatórias (backend)**
@@ -88,8 +88,14 @@ Quando o deploy falha no Render, valide estes pontos:
 4. **Node version**
    - Use Node 18+ (ideal Node 20).
 
-5. **Se aparecer só texto de commits/log no lugar do erro**
-   - Abra o painel de logs do deploy e copie as linhas com `Error`, `Failed`, `Cannot find`, `Prisma`, `TS`, ou `npm ERR!`.
+5. **Se aparecer só texto de commits (como `f470288 Migration & Frontend MVP`)**
+   - Isso **não é o erro técnico**: é apenas descrição/changelog de commit.
+   - No Render, abra o serviço > **Events** > clique no deploy com falha > **View Logs**.
+   - Copie as primeiras linhas que contenham `Error`, `Failed`, `Cannot find module`, `Prisma`, `TypeScript`, `npm ERR!` ou `Exit status`.
+
+6. **Prisma em produção**
+   - Em produção, use `prisma migrate deploy` (não `migrate dev`).
+   - Se o banco estiver vazio, rode primeiro as migrations localmente e suba a pasta `backend/prisma/migrations` para o repositório.
 
 ---
 
