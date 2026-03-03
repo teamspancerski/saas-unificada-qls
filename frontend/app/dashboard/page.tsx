@@ -106,7 +106,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Target className="text-[#00ff88]" size={24} />
-            <h2 className="text-xl font-bold uppercase tracking-tight">Recent Signals QLC</h2>
+            <h2 className="text-xl font-bold uppercase tracking-tight">Recent Signals Quantum</h2>
           </div>
           <button className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-[#00ff88] transition-colors">
             Ver Todos →

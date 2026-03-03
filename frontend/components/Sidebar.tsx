@@ -16,8 +16,8 @@ const Sidebar = () => {
   return (
     <aside className="w-64 h-screen fixed left-0 top-0 glass border-r border-white/10 flex flex-col z-50">
       <div className="p-8">
-        <h1 className="text-2xl font-black bg-gradient-to-r from-[#00ff88] to-[#00d4ff] bg-clip-text text-transparent tracking-tighter">
-          QLS PREMIUM
+        <h1 className="text-xl font-black bg-gradient-to-r from-[#00ff88] to-[#00d4ff] bg-clip-text text-transparent tracking-tighter leading-tight">
+          QUANTUM<br/>LIQUID SYSTEM
         </h1>
       </div>
 

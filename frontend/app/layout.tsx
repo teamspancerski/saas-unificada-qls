@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import AppContainer from '../components/AppContainer'
 
 export const metadata: Metadata = {
-  title: 'QLS Robô Premium',
-  description: 'Bot de trading QLS',
+  title: 'Quantum Liquid System',
+  description: 'Bot de trading QLC',
 }
 
 export default function RootLayout({

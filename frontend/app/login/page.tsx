@@ -15,7 +15,7 @@ export default function Login() {
         const accounts = await provider.send("eth_requestAccounts", []);
         const address = accounts[0];
         const signer = await provider.getSigner();
-        const message = `Autenticação QLS Premium\nTimestamp: ${Date.now()}`;
+        const message = `Autenticação Quantum Liquid System\nTimestamp: ${Date.now()}`;
         const signature = await signer.signMessage(message);
         console.log('Autenticado:', address, signature);
         // Aqui iria a chamada para o backend
@@ -41,7 +41,7 @@ export default function Login() {
               <Zap size={40} className="text-[#00ff88]" fill="#00ff88" />
             </div>
             <h1 className="text-3xl font-black bg-gradient-to-r from-[#00ff88] to-[#00d4ff] bg-clip-text text-transparent tracking-tighter mb-2">
-              {isRegistering ? 'CRIAR CONTA' : 'QLS PREMIUM'}
+              {isRegistering ? 'CRIAR CONTA' : 'QUANTUM LIQUID'}
             </h1>
             <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">
               {isRegistering ? 'Junte-se ao futuro do trading' : 'Acesse o seu terminal de elite'}
