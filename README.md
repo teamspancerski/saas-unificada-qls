@@ -1,58 +1,110 @@
 # QLS SaaS Unificada v4
 
-## Subi o banco e rodei Prisma. E agora?
+## ✅ Prisma concluiu. O que fazer agora?
 
-Se os comandos abaixo já funcionaram:
+Se estes comandos já rodaram sem erro:
 
 - `npx prisma migrate dev --name init_v4`
 - `npx prisma generate`
 
-então o banco **já está sincronizado** e você pode seguir para iniciar os serviços.
+então o banco está sincronizado e o próximo passo é iniciar backend + frontend.
 
-## Próximos passos (desenvolvimento local)
+---
+
+## Comandos **sem falha** (de qualquer pasta)
+
+Use caminhos absolutos para evitar erro de `README.md: No such file or directory`:
+
+```bash
+cd /workspaces/saas-unificada-qls
+nl -ba README.md | sed -n '1,220p'
+git status --short && git log -1 --oneline
+```
+
+Se estiver dentro de `backend` ou `frontend`, o README da raiz é:
+
+```bash
+nl -ba ../README.md | sed -n '1,220p'
+```
+
+---
+
+## Subir localmente
 
 ### 1) Backend
 
-No diretório `backend`:
-
 ```bash
+cd /workspaces/saas-unificada-qls/backend
 npm install
 npm run dev
 ```
 
-Backend esperado em: `http://localhost:4000`.
+Backend esperado em: `http://localhost:4000`
 
 ### 2) Frontend
 
-Em outro terminal, no diretório `frontend`:
-
 ```bash
+cd /workspaces/saas-unificada-qls/frontend
 npm install
 npm run dev
 ```
 
-Frontend esperado em: `http://localhost:3000`.
+Frontend esperado em: `http://localhost:3000`
 
-## Se a porta estiver "desativada" no Jules/Codespaces
+---
 
-Isso normalmente significa que a porta ainda não foi exposta no ambiente.
+## Porta “desativada” no Codespaces/Jules
 
-1. Abra o painel **Ports**.
-2. Clique em **Add Port**.
-3. Adicione a porta do frontend (`3000`) e do backend (`4000`).
-4. Marque visibilidade como `Public` ou `Org` (conforme sua necessidade).
-5. Recarregue a aba de preview.
+1. Abra a aba **Ports**.
+2. Adicione as portas `3000` e `4000`.
+3. Defina visibilidade (Public/Org, conforme necessário).
+4. Atualize o preview.
 
-## Verificação rápida
-
-Com backend rodando, teste:
+Teste rápido backend:
 
 ```bash
 curl http://localhost:4000/health
 ```
 
-Se responder (200/JSON), está ok.
+---
+
+## Render: checklist para erro de deploy
+
+Quando o deploy falha no Render, valide estes pontos:
+
+1. **Serviço backend**
+   - Build Command: `cd backend && npm install && npx prisma generate && npm run build`
+   - Start Command: `cd backend && npm run start`
+
+2. **Variáveis obrigatórias (backend)**
+   - `DATABASE_URL`
+   - `JWT_SECRET`
+
+3. **Serviço frontend**
+   - Build Command: `cd frontend && npm install && npm run build`
+   - Start Command: `cd frontend && npm run start`
+   - `NEXT_PUBLIC_API_URL` deve apontar para a URL pública do backend no Render.
+
+4. **Node version**
+   - Use Node 18+ (ideal Node 20).
+
+5. **Se aparecer só texto de commits/log no lugar do erro**
+   - Abra o painel de logs do deploy e copie as linhas com `Error`, `Failed`, `Cannot find`, `Prisma`, `TS`, ou `npm ERR!`.
 
 ---
 
-Resumo: no seu log, Prisma já concluiu com sucesso. Agora é só subir backend/frontend e expor as portas 3000/4000 no ambiente.
+## Se o README aparecer diferente (ex.: "Cole: ...")
+
+Você provavelmente está em branch/estado antigo. Rode:
+
+```bash
+cd /workspaces/saas-unificada-qls
+git fetch --all
+git status
+```
+
+Depois confirme o conteúdo do README novamente com:
+
+```bash
+nl -ba README.md | sed -n '1,220p'
+```
