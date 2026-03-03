@@ -25,6 +25,11 @@ services:
     environment:
       DATABASE_URL: "postgresql://user:pass@db:5432/qls?schema=public"
       JWT_SECRET: "qls-super-secret-jwt-2026"
+      FRONTEND_URL: "http://localhost:3000"
+      STRIPE_SECRET_KEY: "sk_test_..."
+      STRIPE_WEBHOOK_SECRET: "whsec_..."
+      BINANCE_API_KEY: "your_api_key"
+      BINANCE_SECRET: "your_secret"
       PORT: 4000
     ports:
       - "4000:4000"
