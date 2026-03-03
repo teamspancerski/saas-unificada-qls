@@ -1,26 +1,26 @@
 services:
   - type: web
-    name: qls-backend
+    name: saas-unificada-qls-backend
     env: node
-    buildCommand: cd backend && npm install && npx prisma generate && npm run build
+    buildCommand: cd backend && npm install && npm run build
     startCommand: cd backend && npm run start
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: qls-db
+          name: saas-unificada-qls-db
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
 
   - type: web
-    name: qls-frontend
+    name: saas-unificada-qls-frontend
     env: node
     buildCommand: cd frontend && npm install && npm run build
     startCommand: cd frontend && npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        value: https://qls-backend.onrender.com
+        value: https://saas-unificada-qls-backend.onrender.com
 
 databases:
-  - name: qls-db
+  - name: saas-unificada-qls-db
     plan: free
