@@ -5,9 +5,8 @@ import { prisma } from './prisma';
 type ScoredPair = {
   symbol: string
   score: number
-  data: unknown
+  data: any
 }
-
 
 export class QLCEngine {
   private static instance: QLCEngine;
@@ -26,34 +25,35 @@ export class QLCEngine {
   }
 
   public async start() {
-    console.log('🚀 QLC Engine (Demo Isolated) Started');
+    console.log('🚀 Quantum Liquid System Engine Started');
     setInterval(() => this.scan(), 60000); // 1 min scan
   }
 
   private async scan() {
     try {
-      const activeUsers = await prisma.user.findMany({
-        where: { strategyMode: { in: ['auto', 'monitor'] } },
+      const activeBots = await prisma.bot.findMany({
+        where: { status: { in: ['auto', 'monitor'] } },
         include: { orders: { where: { status: 'open' } } }
       });
 
-      // Top pairs selection logic (simplified for demo)
-      const pairs = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'ARB/USDT'];
-
+      const pairs = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'ARB/USDT', 'LINK/USDT', 'AVAX/USDT'];
       const scoredPairs: ScoredPair[] = [];
+
       for (const symbol of pairs) {
         const data = await this.fetchMarketData(symbol);
         if (!data) continue;
 
-        const score = this.calculateScore(data);
-        scoredPairs.push({ symbol, score, data });
+        const analysis = this.analyzeStrategy(data);
+        scoredPairs.push({ symbol, score: analysis.score, data: analysis });
 
-        for (const user of activeUsers) {
-          await this.processUserStrategy(user, symbol, data, score);
+        // Process bots assigned to this pair
+        const targetBots = activeBots.filter(b => b.pair === symbol);
+        for (const bot of targetBots) {
+          await this.processBotStrategy(bot, symbol, data, analysis);
         }
       }
-      this.topPairs = scoredPairs.sort((a, b) => b.score - a.score).slice(0, 5);
 
+      this.topPairs = scoredPairs.sort((a, b) => b.score - a.score).slice(0, 5);
       await this.checkForceCloses();
     } catch (error) {
       console.error('QLC Engine Scan Error:', error);
@@ -88,82 +88,90 @@ export class QLCEngine {
     };
   }
 
-  private calculateScore(data: any): number {
+  private analyzeStrategy(data: any) {
     const h1 = data['1h'];
+    const h4 = data['4h'];
     const h1Closes = h1.closes;
+    const h4Closes = h4.closes;
 
-    // 1. Regime
-    const ema4h = ta.EMA.calculate({ period: 20, values: data['4h'].closes });
+    // 1. Regime Filter (EMA H4 vs H1)
+    const ema4h = ta.EMA.calculate({ period: 20, values: h4Closes });
     const ema1h = ta.EMA.calculate({ period: 20, values: h1Closes });
-    const adx = ta.ADX.calculate({ high: h1.highs, low: h1.lows, close: h1Closes, period: 14 });
-    const rsi = ta.RSI.calculate({ period: 14, values: h1Closes });
-
     const currentEMA4h = ema4h[ema4h.length - 1];
     const currentEMA1h = ema1h[ema1h.length - 1];
-    const currentADX = adx[adx.length - 1]?.adx || 0;
-    const currentRSI = rsi[rsi.length - 1] || 50;
+    const isBullishRegime = currentEMA1h > currentEMA4h;
 
-    // 2. Compression
+    // 2. Trend Strength (ADX)
+    const adx = ta.ADX.calculate({ high: h1.highs, low: h1.lows, close: h1Closes, period: 14 });
+    const currentADX = adx[adx.length - 1]?.adx || 0;
+
+    // 3. Compression (Bollinger Squeeze)
     const bb = ta.BollingerBands.calculate({ period: 20, stdDev: 2, values: h1Closes });
     const kc = ta.KeltnerChannels.calculate({ maPeriod: 20, multiplier: 1.5, high: h1.highs, low: h1.lows, close: h1Closes, atrPeriod: 14, useSMA: false });
-    const atr = ta.ATR.calculate({ high: h1.highs, low: h1.lows, close: h1Closes, period: 14 });
-
     const lastBB = bb[bb.length - 1];
     const lastKC = kc[kc.length - 1];
+    const isSqueezing = (lastKC && lastBB && lastKC.upper < lastBB.upper && lastKC.lower > lastBB.lower);
+
+    // 4. Volatility (ATR)
+    const atr = ta.ATR.calculate({ high: h1.highs, low: h1.lows, close: h1Closes, period: 14 });
     const lastATR = atr[atr.length - 1];
-    const avgATR = atr.slice(-20).reduce((a: number, b: number) => a + b, 0) / 20;
+    const avgATR = atr.slice(-20).reduce((a, b) => a + b, 0) / 20;
 
-    const bbWidth = (lastBB?.upper || 0) - (lastBB?.lower || 0);
-    const squeeze = (lastKC && lastBB && lastKC.upper < lastBB.upper && lastKC.lower > lastBB.lower) ? 1 : 0;
+    // 5. Breakout Logic
+    const currentPrice = h1Closes[h1Closes.length - 1];
+    const prevHigh = Math.max(...h1.highs.slice(-5, -1));
+    const prevLow = Math.min(...h1.lows.slice(-5, -1));
+    const isBreakoutUp = currentPrice > prevHigh;
+    const isBreakoutDown = currentPrice < prevLow;
 
-    // 3. Score logic
+    // Scoring
     let score = 0;
-    if (currentADX > 25) score += 30;
-    if (squeeze) score += 30;
-    if (lastATR < avgATR * 0.8) score += 20;
-    const avgVol = ta.SMA.calculate({ period: 20, values: h1.volumes }).pop() || 0;
-    if (h1.volumes[h1.volumes.length - 1] > avgVol * 1.5) score += 20;
+    if (currentADX > 25) score += 25;
+    if (isSqueezing) score += 25;
+    if (lastATR < avgATR) score += 10;
+    if (isBreakoutUp || isBreakoutDown) score += 40;
 
-    return Math.min(100, score);
+    return {
+      score: Math.min(100, score),
+      isBullishRegime,
+      isSqueezing,
+      isBreakoutUp,
+      isBreakoutDown,
+      currentPrice
+    };
   }
 
-  private async processUserStrategy(user: any, symbol: string, data: any, score: number) {
-    const existingOrder = user.orders.find((o: any) => o.symbol === symbol);
+  private async processBotStrategy(bot: any, symbol: string, data: any, analysis: any) {
+    const hasOpenOrder = bot.orders.length > 0;
+    if (hasOpenOrder) return;
 
-    // Ping-pong Logic
-    if (existingOrder && existingOrder.status === 'open') {
-        // Handle ping-pong stop/reversal here if needed
-        return;
-    }
+    const settings = (bot.settings as any) || {};
+    const minScore = 75;
 
-    if (score > 75) {
-      const h1Closes = data['1h'].closes;
-      const lastClose = h1Closes[h1Closes.length - 1];
+    if (analysis.score >= minScore) {
+      let side = '';
+      if (analysis.isBullishRegime && analysis.isBreakoutUp) side = 'buy';
+      if (!analysis.isBullishRegime && analysis.isBreakoutDown) side = 'sell';
 
-      // Regime Filter
-      const ema4h = ta.EMA.calculate({ period: 20, values: data['4h'].closes }).pop() || 0;
-      const ema1h = ta.EMA.calculate({ period: 20, values: h1Closes }).pop() || 0;
-      const isBull = ema4h > ema1h; // Simplified regime
-
-      let side = isBull ? 'buy' : 'sell';
-
-      if (user.strategyMode === 'auto') {
-        await this.createOrder(user, symbol, side, lastClose, score);
+      if (side && bot.status === 'auto') {
+        await this.executeTrade(bot, symbol, side, analysis.currentPrice, analysis.score);
       }
     }
   }
 
-  private async createOrder(user: any, symbol: string, side: string, price: number, score: number) {
-    const riskAmount = user.capitalTotal * (user.riskPerTrade / 100);
-    const size = riskAmount; // simplified
+  private async executeTrade(bot: any, symbol: string, side: string, price: number, score: number) {
+    const settings = (bot.settings as any) || {};
+    const capital = settings.capitalTotal || 1000;
+    const risk = settings.riskPerTrade || 1.0;
+    const size = capital * (risk / 100);
 
-    const maxHoldHours = parseInt(user.maxHoldTime);
+    const maxHoldHours = parseInt(settings.maxHoldTime || "4");
     const forceCloseAt = new Date();
-    forceCloseAt.setHours(forceCloseAt.getHours() + (isNaN(maxHoldHours) ? 1 : maxHoldHours));
+    forceCloseAt.setHours(forceCloseAt.getHours() + (isNaN(maxHoldHours) ? 4 : maxHoldHours));
 
     await prisma.order.create({
       data: {
-        userId: user.id,
+        botId: bot.id,
         symbol,
         side,
         type: side === 'buy' ? 'long' : 'short',
@@ -175,21 +183,29 @@ export class QLCEngine {
         forceCloseAt
       }
     });
-    console.log(`[AUTO] Order Created for ${user.uuid}: ${symbol} ${side}`);
+    console.log(`[EXECUTION] Bot ${bot.name} | ${symbol} ${side.toUpperCase()} at ${price}`);
   }
 
   private async checkForceCloses() {
     const now = new Date();
     const expiredOrders = await prisma.order.findMany({
-      where: { status: 'open', forceCloseAt: { lte: now } }
+      where: { status: 'open', forceCloseAt: { lte: now } },
+      include: { bot: true }
     });
 
     for (const order of expiredOrders) {
+      // For demo, we just close with 0 pnl or random pnl
+      const pnl = (Math.random() * 20) - 10;
       await prisma.order.update({
         where: { id: order.id },
-        data: { status: 'forced_closed', closedAt: now }
+        data: {
+          status: 'forced_closed',
+          closedAt: now,
+          exitPrice: order.entryPrice * (1 + (pnl / 100)),
+          pnl: pnl
+        }
       });
-      console.log(`[FORCE CLOSE] Order ${order.id} closed due to time limit`);
+      console.log(`[FORCE CLOSE] Order ${order.id} closed | PnL: ${pnl.toFixed(2)}%`);
     }
   }
 }

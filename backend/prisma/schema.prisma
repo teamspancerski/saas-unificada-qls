@@ -7,23 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  users     User[]
+  bots      Bot[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("organizations")
+}
+
 model User {
   id              String        @id @default(cuid())
   uuid            String        @unique @default(uuid())
   email           String        @unique
   name            String?
   hashedPassword  String
+  wallet          String?       @unique
+  role            String        @default("trader") // admin, trader
   stripeCustomerId String?      @unique
+
+  organizationId  String
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+
   subscription    Subscription?
   apiKeys         ApiKey[]
-
-  // Bot Strategy Configuration
-  botStatus       Boolean       @default(false)
-  strategyMode    String        @default("off") // auto, monitor, off
-  capitalTotal    Float         @default(1000)
-  riskPerTrade    Float         @default(1.0)
-  maxHoldTime     String        @default("1h") // 15m, 1h, 4h, 24h
-  pingPongEnabled Boolean       @default(false)
 
   // Risk Metrics
   dailyPnL        Float         @default(0)
@@ -31,9 +41,26 @@ model User {
 
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  orders          Order[]
 
   @@map("users")
+}
+
+model Bot {
+  id              String   @id @default(cuid())
+  name            String
+  strategy        String   @default("QLC")
+  status          String   @default("off") // auto, monitor, off
+  pair            String   @default("BTC/USDT")
+  settings        Json?    // { capitalTotal, riskPerTrade, maxHoldTime, pingPongEnabled }
+
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  orders          Order[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("bots")
 }
 
 model ApiKey {
@@ -57,7 +84,9 @@ model Subscription {
 
 model Order {
   id              String   @id @default(cuid())
-  userId          String
+  botId           String
+  bot             Bot      @relation(fields: [botId], references: [id])
+
   symbol          String
   side            String   // buy, sell
   type            String   // long, short
@@ -65,13 +94,13 @@ model Order {
   exitPrice       Float?
   amount          Float
   size            Float    // Position size in USD
+  pnl             Float?
   score           Float
   status          String   @default("open") // open, closed, forced_closed
   pingPongState   String?  // none, first_stop, short_2x
   openedAt        DateTime @default(now())
   closedAt        DateTime?
   forceCloseAt    DateTime?
-  user            User     @relation(fields: [userId], references: [id])
 
   @@map("orders")
 }

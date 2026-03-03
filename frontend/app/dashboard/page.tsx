@@ -1,19 +1,45 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, DollarSign, Zap, Clock, Target } from 'lucide-react';
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export default function Dashboard() {
-  const [topPairs] = useState([
-    { symbol: 'BTC/USDT', score: 92, vol: '2.4B', atr: '1.2%' },
-    { symbol: 'ETH/USDT', score: 88, vol: '1.8B', atr: '1.5%' },
-    { symbol: 'SOL/USDT', score: 85, vol: '900M', atr: '2.8%' },
-    { symbol: 'LINK/USDT', score: 79, vol: '400M', atr: '2.1%' },
-  ]);
+  const [metrics, setMetrics] = useState<any>({ totalPnL: 0, winRate: 62.4, activeBots: 0, totalBots: 0 });
+  const [topPairs, setTopPairs] = useState<any[]>([]);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [orgId, setOrgId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // In a real app, this would come from auth context/token
+    const savedOrgId = localStorage.getItem('orgId') || 'default-org';
+    setOrgId(savedOrgId);
+
+    const fetchData = async () => {
+      try {
+        const [mRes, pRes, oRes] = await Promise.all([
+          axios.get(`${API_URL}/metrics/org/${savedOrgId}`),
+          axios.get(`${API_URL}/pairs/score`),
+          axios.get(`${API_URL}/orders/org/${savedOrgId}`)
+        ]);
+        setMetrics(mRes.data);
+        setTopPairs(pRes.data);
+        setRecentOrders(oRes.data.slice(0, 5));
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const kpis = [
-    { name: 'Sharpe Ratio', value: '2.47', icon: BarChart3, trend: '+0.12', color: '#00ff88' },
-    { name: 'Win Rate', value: '62.4%', icon: TrendingUp, trend: '+2.1%', color: '#00d4ff' },
-    { name: 'Max Drawdown', value: '4.2%', icon: DollarSign, trend: '-0.5%', color: '#f43f5e' },
+    { name: 'Total PnL', value: `$${metrics.totalPnL?.toFixed(2)}`, icon: BarChart3, trend: '+12.4%', color: '#00ff88' },
+    { name: 'Win Rate', value: `${metrics.winRate?.toFixed(1)}%`, icon: TrendingUp, trend: '+2.1%', color: '#00d4ff' },
+    { name: 'Bots Ativos', value: `${metrics.activeBots}/${metrics.totalBots}`, icon: Zap, trend: 'Stable', color: '#f43f5e' },
   ];
 
   return (
@@ -60,13 +86,6 @@ export default function Dashboard() {
 
           <div className="h-[450px] w-full bg-black/40 rounded-3xl border border-white/10 overflow-hidden relative group">
             <iframe src="https://www.tradingview.com/embed/?symbol=BINANCE:BTCUSDT&theme=dark" className="w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute bottom-6 left-6 p-6 glass rounded-2xl backdrop-blur-3xl border border-white/10">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total PnL Estimado</p>
-              <div className="flex items-baseline gap-3">
-                <span className="text-2xl font-black text-[#00ff88]">+$12,450.00</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">+12.4%</span>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -77,7 +96,7 @@ export default function Dashboard() {
             <h2 className="text-lg font-bold uppercase tracking-tight text-[#00d4ff]">Top Pairs Score</h2>
           </div>
           <div className="space-y-4">
-            {topPairs.map((p) => (
+            {topPairs.length > 0 ? topPairs.map((p: any) => (
               <div key={p.symbol} className="p-5 bg-black/20 rounded-2xl border border-white/5 hover:border-[#00d4ff]/30 transition-all group cursor-pointer">
                 <div className="flex justify-between items-center mb-3">
                   <span className="font-black text-sm uppercase tracking-wider">{p.symbol}</span>
@@ -96,7 +115,9 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-12 text-slate-600 text-xs font-black uppercase tracking-widest">Aguardando sinais...</div>
+            )}
           </div>
         </div>
       </div>
@@ -126,32 +147,39 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody className="text-sm font-bold">
-              {[1, 2, 3].map((i) => (
-                <tr key={i} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+              {recentOrders.map((order) => (
+                <tr key={order.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
                   <td className="py-6 flex items-center gap-4">
                     <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px]">
-                      B
+                      {order.symbol[0]}
                     </div>
-                    <span>BTC/USDT</span>
+                    <span>{order.symbol}</span>
                   </td>
                   <td className="py-6">
-                    <span className="px-3 py-1.5 rounded-xl bg-[#00ff88]/10 text-[#00ff88] text-[10px] font-black uppercase tracking-widest border border-[#00ff88]/20">
-                      BUY LONG
+                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${order.side === 'buy' ? 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/20' : 'bg-rose-500/10 text-rose-500 border-rose-500/20'}`}>
+                      {order.side === 'buy' ? 'BUY LONG' : 'SELL SHORT'}
                     </span>
                   </td>
-                  <td className="py-6 text-slate-400">$64,245.12</td>
-                  <td className="py-6 text-[#00ff88]">92%</td>
+                  <td className="py-6 text-slate-400">${order.entryPrice.toFixed(2)}</td>
+                  <td className="py-6 text-[#00ff88]">{order.score}%</td>
                   <td className="py-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse"></div>
-                      <span className="text-[10px] uppercase tracking-widest font-black">OPEN</span>
+                      <div className={`w-1.5 h-1.5 rounded-full ${order.status === 'open' ? 'bg-[#00ff88] animate-pulse' : 'bg-slate-600'}`}></div>
+                      <span className="text-[10px] uppercase tracking-widest font-black">{order.status}</span>
                     </div>
                   </td>
                   <td className="py-6 text-slate-500 flex items-center gap-2">
-                    <Clock size={14} /> <span className="text-[10px] font-mono tracking-wider">03:42:15</span>
+                    <Clock size={14} /> <span className="text-[10px] font-mono tracking-wider">
+                      {order.status === 'open' ? 'Em andamento' : 'Finalizado'}
+                    </span>
                   </td>
                 </tr>
               ))}
+              {recentOrders.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-600 text-[10px] font-black uppercase tracking-widest">Nenhuma ordem encontrada</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
