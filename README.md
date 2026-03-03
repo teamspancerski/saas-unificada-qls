@@ -108,3 +108,31 @@ Depois confirme o conteúdo do README novamente com:
 ```bash
 nl -ba README.md | sed -n '1,220p'
 ```
+
+Se ainda aparecer:
+
+```
+1  Cole: # QLS SaaS Unificada v4
+2  Commit new file > "Commit directly to main"
+```
+
+faça este reparo **sem perder suas alterações do backend/frontend**:
+
+```bash
+cd /workspaces/saas-unificada-qls
+# restaura só o README da branch remota
+git fetch origin
+git checkout origin/$(git rev-parse --abbrev-ref HEAD) -- README.md
+
+# confirme
+nl -ba README.md | sed -n '1,40p'
+```
+
+Se o comando acima falhar por nome de branch incomum, use:
+
+```bash
+cd /workspaces/saas-unificada-qls
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+git fetch origin
+git checkout origin/$CURRENT_BRANCH -- README.md
+```
