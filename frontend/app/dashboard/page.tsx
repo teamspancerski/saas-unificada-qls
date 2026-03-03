@@ -6,7 +6,7 @@ import { API_URL } from '../../lib/api';
 export default function Dashboard() {
   const [topPairs, setTopPairs] = useState([]);
   const [signals, setSignals] = useState([]);
-  const [metrics, setMetrics] = useState({ sharpe: '2.47', winRate: '62.4%', drawdown: '4.2%' });
+  const [metrics, setMetrics] = useState({ sharpe: '0.00', winRate: '0%', drawdown: '0%' });
   const [loading, setLoading] = useState(true);
 
   // For demo/MVP, we'll try to sync or use a default if no user is found
@@ -17,11 +17,23 @@ export default function Dashboard() {
         // Try to get pairs score
         const pairsRes = await fetch(`${API_URL}/pairs/score`);
         const pairsData = await pairsRes.json();
-        setTopPairs(pairsData);
+        setTopPairs(Array.isArray(pairsData) ? pairsData : []);
 
-        // Try to get metrics for a default user if exists or just mock for now if no uuid
-        // In this MVP, we might not have a uuid yet if not connected via Rabby on this page
-        // But we can at least try to fetch if we had a persistent session
+        // In this MVP, we might not have a user uuid yet.
+        // We'll try to fetch metrics for a placeholder if none exists to show the engine is live.
+        const userUuid = localStorage.getItem('qls_user_uuid') || 'demo-user';
+
+        const metricsRes = await fetch(`${API_URL}/metrics/${userUuid}`);
+        if (metricsRes.ok) {
+          const metricsData = await metricsRes.json();
+          setMetrics({
+            sharpe: metricsData.sharpe.toString(),
+            winRate: `${metricsData.winRate}%`,
+            drawdown: `${metricsData.drawdown}%`
+          });
+          setSignals(metricsData.orders || []);
+        }
+
       } catch (err) {
         console.error("Failed to fetch dashboard data", err);
       } finally {
