@@ -15,8 +15,8 @@ export async function stripeRoutes(app: FastifyInstance) {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: 'http://localhost:3000/success',
-      cancel_url: 'http://localhost:3000/cancel',
+      success_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/success`,
+      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/cancel`,
       metadata: { userId }
     });
 

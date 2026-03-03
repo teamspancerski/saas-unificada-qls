@@ -2,8 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Bot, Play, Pause, DollarSign, TrendingUp, Clock, Zap, Target, BarChart3 } from 'lucide-react';
 import { ethers } from 'ethers';
-
-const BACKEND_URL = 'http://localhost:3000';
+import { API_URL } from '../lib/api';
 
 export default function Dashboard() {
   const [botStatus, setBotStatus] = useState(false);
@@ -18,11 +17,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (user) {
-      fetch(`${BACKEND_URL}/metrics/${user.uuid}`)
+      fetch(`${API_URL}/metrics/${user.uuid}`)
         .then(res => res.json())
         .then(data => setSignals(data.orders));
 
-      fetch(`${BACKEND_URL}/pairs/score`)
+      fetch(`${API_URL}/pairs/score`)
         .then(res => res.json())
         .then(data => setTopPairs(data));
     }
@@ -35,7 +34,7 @@ export default function Dashboard() {
       const address = accounts[0];
       setAccount(address);
 
-      const res = await fetch(`${BACKEND_URL}/user/sync`, {
+      const res = await fetch(`${API_URL}/user/sync`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ walletAddress: address })
@@ -54,7 +53,7 @@ export default function Dashboard() {
 
   const updateConfig = async () => {
     if (!user) return;
-    await fetch(`${BACKEND_URL}/users/${user.uuid}/config`, {
+    await fetch(`${API_URL}/users/${user.uuid}/config`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ capitalTotal: capital, riskPerTrade: risk, maxHoldTime: holdTime })
@@ -63,7 +62,7 @@ export default function Dashboard() {
 
   const startStrategy = async (mode: string) => {
     if (!user) return;
-    const res = await fetch(`${BACKEND_URL}/strategy/start`, {
+    const res = await fetch(`${API_URL}/strategy/start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ uuid: user.uuid, mode })
