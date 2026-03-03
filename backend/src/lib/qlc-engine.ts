@@ -33,7 +33,7 @@ export class QLCEngine {
       // Top pairs selection logic (simplified for demo)
       const pairs = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'ARB/USDT'];
 
-      const scoredPairs = [];
+      const scoredPairs: any[] = [];
       for (const symbol of pairs) {
         const data = await this.fetchMarketData(symbol);
         if (!data) continue;
