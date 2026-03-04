@@ -1,8 +1,8 @@
 import ccxt from 'ccxt';
 import * as ta from 'technicalindicators';
-import { prisma } from './prisma';
+import { prisma } from '../lib/prisma';
 
-type ScoredPair = {
+export type ScoredPair = {
   symbol: string
   score: number
   data: unknown
@@ -11,7 +11,7 @@ type ScoredPair = {
 
 export class QLCEngine {
   private static instance: QLCEngine;
-  private binance: ccxt.binance;
+  private binance: any;
   public topPairs: ScoredPair[] = [];
 
   private constructor() {
@@ -28,11 +28,12 @@ export class QLCEngine {
   public async start() {
     console.log('🚀 QLC Engine (Demo Isolated) Started');
     setInterval(() => this.scan(), 60000); // 1 min scan
+    await this.scan(); // Initial scan
   }
 
-  private async scan() {
+  public async scan() {
     try {
-      const activeUsers = await prisma.user.findMany({
+      const activeUsers = await (prisma as any).user.findMany({
         where: { strategyMode: { in: ['auto', 'monitor'] } },
         include: { orders: { where: { status: 'open' } } }
       });
@@ -100,8 +101,8 @@ export class QLCEngine {
 
     const currentEMA4h = ema4h[ema4h.length - 1];
     const currentEMA1h = ema1h[ema1h.length - 1];
-    const currentADX = adx[adx.length - 1]?.adx || 0;
-    const currentRSI = rsi[rsi.length - 1] || 50;
+    const currentADX = (adx && adx.length > 0) ? adx[adx.length - 1].adx : 0;
+    const currentRSI = (rsi && rsi.length > 0) ? rsi[rsi.length - 1] : 50;
 
     // 2. Compression
     const bb = ta.BollingerBands.calculate({ period: 20, stdDev: 2, values: h1Closes });
@@ -161,7 +162,7 @@ export class QLCEngine {
     const forceCloseAt = new Date();
     forceCloseAt.setHours(forceCloseAt.getHours() + (isNaN(maxHoldHours) ? 1 : maxHoldHours));
 
-    await prisma.order.create({
+    await (prisma as any).order.create({
       data: {
         userId: user.id,
         symbol,
@@ -180,16 +181,22 @@ export class QLCEngine {
 
   private async checkForceCloses() {
     const now = new Date();
-    const expiredOrders = await prisma.order.findMany({
+    const expiredOrders = await (prisma as any).order.findMany({
       where: { status: 'open', forceCloseAt: { lte: now } }
     });
 
     for (const order of expiredOrders) {
-      await prisma.order.update({
+      await (prisma as any).order.update({
         where: { id: order.id },
         data: { status: 'forced_closed', closedAt: now }
       });
       console.log(`[FORCE CLOSE] Order ${order.id} closed due to time limit`);
     }
   }
+}
+
+export async function scanMarket() {
+  const engine = QLCEngine.getInstance();
+  await engine.scan();
+  return engine.topPairs[0] || null;
 }

@@ -4,14 +4,13 @@ import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import helmet from '@fastify/helmet';
 import dotenv from 'dotenv';
-import ccxt from 'ccxt';
-import * as ta from 'technicalindicators';
 import { prisma } from './lib/prisma';
 import { authRoutes } from './routes/auth';
 import { botRoutes } from './routes/bot';
 import { stripeRoutes } from './routes/stripe';
 import { strategyRoutes } from './routes/strategy';
-import { QLCEngine } from './lib/qlc-engine';
+import { tradeRoutes } from './routes/trade.routes';
+import { QLCEngine } from './trading-engine/qlc-engine';
 
 dotenv.config();
 
@@ -27,6 +26,7 @@ const startServer = async () => {
   fastify.register(botRoutes);
   fastify.register(stripeRoutes);
   fastify.register(strategyRoutes);
+  fastify.register(tradeRoutes, { prefix: '/trade' });
 
   // 🧠 MOTOR QLC - Enhanced Demo Isolated Engine
   const engine = QLCEngine.getInstance();

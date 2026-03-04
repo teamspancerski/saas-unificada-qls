@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma';
-import { QLCEngine } from '../lib/qlc-engine';
+import { QLCEngine } from '../trading-engine/qlc-engine';
 
 export async function strategyRoutes(app: FastifyInstance) {
   // Update User Configuration
